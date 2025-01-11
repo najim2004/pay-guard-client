@@ -5,14 +5,14 @@ export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
-        url: "/login",
+        url: "/auth/login",
         method: "POST",
-        body: credentials, //example: {"email":"naim.microdeft@gmail.com","password": "12345678"}
+        body: credentials,
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data: res } = await queryFulfilled;
-          if (res?.data?.token && res?.status && res?.data?.user) {
+          if (res?.data?.token && res?.success && res?.data?.user) {
             localStorage.setItem(
               "auth",
               JSON.stringify({
@@ -24,7 +24,7 @@ export const authApi = baseApi.injectEndpoints({
               })
             );
           }
-          res?.status ? dispatch(loginSuccess(res)) : dispatch(loginFailure());
+          res?.success ? dispatch(loginSuccess(res)) : dispatch(loginFailure());
         } catch (error) {
           dispatch(loginFailure());
           console.error("Login Error:", error);
@@ -33,10 +33,10 @@ export const authApi = baseApi.injectEndpoints({
       invalidatesTags: ["Login"],
     }),
     register: builder.mutation({
-      query: (userData) => ({
-        url: "/register",
+      query: (credentials) => ({
+        url: "/auth/register",
         method: "POST",
-        body: userData, // example:{"name":"Naimul Hasan","email":"naim.microdeft@gmail.com","password": "12345678"}
+        body: credentials,
       }),
     }),
   }),

@@ -31,7 +31,7 @@ export const Signup = () => {
   const authState = useSelector((state) => state.auth);
   const form = useForm({
     defaultValues: {
-      fullName: "",
+      full_name: "",
       email: "",
       password: "",
     },
@@ -39,54 +39,45 @@ export const Signup = () => {
   if (authState?.token) {
     return <Navigate to="/" />;
   }
-  const handleToast = (res) => {
-    if (res?.status) {
+  const handleToast = (response) => {
+    const defaultSuccessMessage = "Account created successfully";
+    const defaultErrorMessage = "Failed to create account";
+
+    if (response?.success) {
       toast({
-        variant: "default",
-        title: "Success",
-        description: res.status_message || "Account created successfully",
+        variant: "success",
+        title: "Account Created",
+        description: response.message || defaultSuccessMessage,
+        duration: 3000,
       });
-      navigator("/login");
+      navigator("/login", { replace: true });
     } else {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: res.status_message || "Failed to create account",
+        title: "Registration Failed",
+        description: response.message || defaultErrorMessage,
+        duration: 3000,
       });
     }
   };
 
-  const onSubmit = async (data) => {
-    // example:{"name":"Naimul Hasan","email":"naim.microdeft@gmail.com","password": "12345678"}
+  const onSubmit = async (formData) => {
     try {
-      const response = await onSignup({
-        name: data?.fullName,
-        email: data?.email,
-        password: data?.password,
-      }).unwrap();
-      /*
-      success response example:
-        {
-            "status": true,
-            "status_message": "Success! Registration successful.",
-            "data": {
-                "token": "338|Yg8uUk9ecqX8FjR0yQOsB5nJMyVUXGPvi1dg6eSffe3f7ffd",
-                "user": {
-                    "id": 130,
-                    "name": "Najim",
-                    "email": "user@japalearn.com"
-                }
-            },
-            "status_code": 200,
-            "status_class": "success"
-        }
-      */
+      const payload = {
+        name: formData.full_name,
+        email: formData.email,
+        password: formData.password,
+      };
+
+      const response = await onSignup(payload).unwrap();
       handleToast(response);
-    } catch (err) {
+    } catch (error) {
       handleToast({
-        status: false,
-        status_message:
-          err?.data?.message || err.message || "An error occurred",
+        success: false,
+        message:
+          error?.data?.message ||
+          error.message ||
+          "An unexpected error occurred",
       });
     }
   };
@@ -112,11 +103,24 @@ export const Signup = () => {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
-                {/* Full Name Input */}
                 <FormField
                   control={form.control}
-                  name="fullName"
-                  rules={{ required: true }}
+                  name="full_name"
+                  rules={{
+                    required: "Full name is required",
+                    minLength: {
+                      value: 3,
+                      message: "Full name must be at least 3 characters",
+                    },
+                    pattern: {
+                      value: /^[a-zA-Z\s]*$/,
+                      message: "Full name can only contain letters and spaces",
+                    },
+                    maxLength: {
+                      value: 50,
+                      message: "Full name cannot exceed 50 characters",
+                    },
+                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Your Full Name</FormLabel>
@@ -127,12 +131,20 @@ export const Signup = () => {
                     </FormItem>
                   )}
                 />
-
-                {/* Email Input */}
                 <FormField
                   control={form.control}
                   name="email"
-                  rules={{ required: true }}
+                  rules={{
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                    maxLength: {
+                      value: 100,
+                      message: "Email cannot exceed 100 characters",
+                    },
+                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Your Email</FormLabel>
@@ -147,12 +159,22 @@ export const Signup = () => {
                     </FormItem>
                   )}
                 />
-
-                {/* Password Input */}
                 <FormField
                   control={form.control}
                   name="password"
-                  rules={{ required: true }}
+                  rules={{
+                    required: "Password is required",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters",
+                    },
+                    pattern: {
+                      value:
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                      message:
+                        "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
+                    },
+                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Your Password</FormLabel>

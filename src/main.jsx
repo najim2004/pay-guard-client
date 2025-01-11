@@ -6,12 +6,15 @@ import AppRouter from "./routes/AppRouter";
 import { Toaster } from "./components/ui/toaster";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
+import { InitialDataFetcher } from "./components/InitialDataFetcher";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-        <AppRouter />
+        <InitialDataFetcher>
+          <AppRouter />
+        </InitialDataFetcher>
       </BrowserRouter>
       <Toaster />
     </Provider>

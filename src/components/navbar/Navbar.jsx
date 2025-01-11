@@ -1,5 +1,11 @@
 import { Link } from "react-router-dom";
-import { LogIn, UserPlus, Menu, LogOut } from "lucide-react";
+import {
+  LogIn,
+  UserPlus,
+  Menu,
+  LogOut,
+  LayoutDashboardIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -26,7 +32,7 @@ const Navbar = () => {
 
   const NavLinks = () => (
     <div className="flex flex-col md:flex-row gap-4">
-      {authState?.token ? (
+      {authState?.user?.email ? (
         <></>
       ) : (
         <>
@@ -53,7 +59,6 @@ const Navbar = () => {
   return (
     <nav className="border-b">
       <div className="mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-2 font-bold">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -62,70 +67,65 @@ const Navbar = () => {
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path d="M12 14l9-5-9-5-9 5 9 5z" />
-            <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M12 14l9-5-9-5-9 5 9 5z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 20v-6"
+              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
             />
           </svg>
-          <span className="text-xl">React Academy</span>
+          <span className="text-xl">Pay Guard</span>
         </Link>
-
         {/* Desktop Navigation */}
         <div className="flex items-center gap-6">
           <div className="hidden md:flex items-center space-x-4">
             <NavLinks />
           </div>
-          {authState?.token && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-8 w-8 rounded-full"
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="size-10">
+                  <AvatarImage src={""} alt="user avatar" />
+                  <AvatarFallback>
+                    {authState?.user?.name[0] || "?"}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56 mt-4" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal border-b mb-3">
+                <div className="flex flex-col space-y-1 text-center">
+                  <p className="text-sm font-medium">
+                    {authState?.user?.name || "user name"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {authState.user?.email || "user email"}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuItem>
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-4 text-sm font-semibold w-full"
                 >
-                  <Avatar className="size-10">
-                    <AvatarImage src={""} alt="user avatar" />
-                    <AvatarFallback>
-                      {authState?.user?.name[0] || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1 text-center">
-                    <p className="text-sm font-medium">
-                      {authState?.user?.name || "user name"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {authState.user?.email || "user email"}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() => {
-                    dispatcher(logout());
-                    dispatcher(clearState());
-                  }}
-                  className="text-red-500"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+                  <LayoutDashboardIcon className="size-4" />{" "}
+                  <span>Dashboard</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  dispatcher(logout());
+                  dispatcher(clearState());
+                }}
+                className="text-red-500 text-sm font-semibold"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {/* Mobile Navigation */}
-          <div className="md:hidden">
+          <div className="hidden">
             <Sheet className="md:hidden">
               <SheetTrigger className="md:hidden" asChild>
                 <Button variant="outline" size="icon">
@@ -143,22 +143,14 @@ const Navbar = () => {
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
-                        <path d="M12 14l9-5-9-5-9 5 9 5z" />
-                        <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M12 14l9-5-9-5-9 5 9 5z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 20v-6"
+                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
                         />
                       </svg>
-                      <span className="text-xl">React Academy</span>
+                      <span className="text-xl">Pay Guard</span>
                     </div>
                   </SheetTitle>
                 </SheetHeader>

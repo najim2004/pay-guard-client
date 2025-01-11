@@ -39,54 +39,41 @@ export const Login = () => {
   if (authState?.token) {
     return <Navigate to="/" />;
   }
-  const handleToast = (res) => {
-    if (res?.status) {
+  const handleToast = (response) => {
+    const defaultSuccessMessage = "Successfully logged in to your account";
+    const defaultErrorMessage = "Authentication failed. Please try again";
+
+    if (response?.success) {
       toast({
         variant: "default",
-        title: "Success",
-        description: res?.status_message || "Logged in successfully",
+        title: "Authentication Successful",
+        description: response?.message || defaultSuccessMessage,
       });
       navigator("/");
     } else {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: res?.status_message || "Failed to login account",
+        title: "Authentication Failed",
+        description: response?.message || defaultErrorMessage,
       });
     }
   };
 
   const onSubmit = async (data) => {
-    //example: {"email":"naim.microdeft@gmail.com","password": "12345678"}
-    /*
-        Example success response:
-        {
-            "status": true,
-            "status_message": "Success! Login successful.",
-            "data": {
-                "token": "351|UZO0C4FOpLnZWS29sW3NRRgEFHrFB4vL1C3comaf4a0725d1",
-                "user": {
-                    "id": 130,
-                    "name": "Najim",
-                    "email": "user@japalearn.com"
-                }
-            },
-            "status_code": 200,
-            "status_class": "success"
-        }
-    */
     try {
-      const res = await onLogin({
+      const response = await onLogin({
         email: data?.email,
         password: data?.password,
       }).unwrap();
-      handleToast(res);
-    } catch (err) {
-      console.error(err);
+      handleToast(response);
+    } catch (error) {
+      console.error("Login Error:", error);
       handleToast({
-        status: false,
-        status_message:
-          err?.data?.message || err.message || "An error occurred",
+        success: false,
+        message:
+          error?.data?.message ||
+          error.message ||
+          "An unexpected error occurred",
       });
     }
   };
